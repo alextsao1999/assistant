@@ -19,7 +19,8 @@ class SoundAssistant :
             text = self.recognaizer.regcognize(b''.join(data))
             if text != '':
                 print("你说 : ", text)
-                self.interation.parse(text)
+                response = self.interation.parse(text)
+                print("机器人 : ", response)
 
     def stop(self):
         self.sound_trigger.stop()
@@ -31,9 +32,7 @@ class SoundAssistant :
 if __name__ == '__main__':
     def domain_run(intent, value):
         print("跑步!   意图:", intent, " value : ", value)
-
         pass
-
 
     ct = CommandTrigger()
     ct.add_domain("run", domain_run)

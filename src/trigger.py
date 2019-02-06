@@ -4,9 +4,6 @@ import wave
 import pyaudio
 import pydub
 
-from src.recognizer import BaiduSpeekRecognizer
-
-
 class SoundTrigger :
     # WIDTH = 2
     # CHANNELS = 1

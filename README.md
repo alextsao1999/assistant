@@ -1,2 +1,14 @@
-# assistant
-hypermind assistant 语音助手
+# HyperMind语音助手
+
+接入百度语音识别API
+
+如果声音RMS大于特定阈值就开始录制
+
+录制完成后将buff进行上传到百度云进行语音识别
+
+暂时还为开发完成, 正在整合百度的UNIT
+
+
+
+运行assistant.py 进行简单的机器人对话吧~
+
