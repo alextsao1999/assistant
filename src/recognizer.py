@@ -1,6 +1,9 @@
 import requests
 import json
 
+from src.command import CommandTrigger
+
+
 class SpeekRecognizer:
     def regcognize(self, data) :
         pass
@@ -44,16 +47,22 @@ class BaiduSpeekRecognizer(SpeekRecognizer) :
         return ''
 
 class BaiduInteraction:
+    #百度UNIT 理解和交互的配置数据
     appid = '15534301'
     appkey = '3gqBI5oIGTdxjNizhCjBHsXC'
     secretkey = 'HOK2DY4ggXvVnZOmaIGwrufvAdlraXOd'
+
+    #发送数据的头部
     headers = {'Content-Type': 'application/json'}
 
+    #会话ID
     session_id = ''
 
     def __init__(self):
+        '''
+        初始化权限Token
+        '''
         self.token = self.get_token()
-        print(self.token)
 
     def get_token(self):
         '''
@@ -74,6 +83,13 @@ class BaiduInteraction:
 
         return token
 
+    def clear_session(self):
+        '''
+        清除session对话
+        :return:
+        '''
+        self.session_id = ''
+
     def parse(self, content):
         url = 'https://aip.baidubce.com/rpc/2.0/unit/service/chat?access_token=' + self.token
         data = {
@@ -88,15 +104,79 @@ class BaiduInteraction:
         }
         res = requests.post(url, json = data, headers = self.headers)
         fdata = json.loads(res.text)
-        # print(fdata)
         if fdata['error_code'] == 0:
             self.last_dialog = fdata['result']
             self.session_id = self.last_dialog['session_id']
+            return True
+        return False
 
-            first_action = fdata['result']['response_list'][0]['action_list'][0]
-            return first_action['say']
-        return ""
+    def get_response(self):
+        return self.Response(self.last_dialog['response_list'])
+
+    class Response:
+        '''
+        回复类
+        通过这个类可以解析获取机器人要说的话 要做的动作
+        解析机器人的意图 并调用命令触发器执行意图
+        '''
+        class NoResponseException(Exception):
+            pass
+
+        def __init__(self, responses):
+            if len(responses) > 0 :
+                self.response = responses[0] #取得最佳回复
+                action_list = self.response['action_list']
+                if len(action_list) > 0:
+                    #取得最佳action
+                    self.action = action_list[0]
+            else:
+                raise self.NoResponseException #抛出无回复异常
+
+        def get_say(self):
+            '''
+            :return: 机器人要说的话
+            '''
+            return self.action['say']
+
+        def get_action(self):
+            '''
+            :return:  获得要做的动作
+            '''
+            return self.action['action_id']
+
+        def exe_cmd(self, command_trigger):
+            '''
+            执行Response 中的命令意图
+            :param command_trigger: 命令触发器
+            :return: None
+            '''
+            schema = self.response['schema']
+
+            print(schema)
+            if 'slots' in schema:
+                slots = schema['slots']
+                for slot in slots:
+                    command_trigger.trigger(schema['intent'], slot['name'], slot['normalized_word'])
+            else:
+                command_trigger.trigger(schema['intent'])
 
 if __name__ == '__main__':
+    def walk_callback(name, arg):
+        print("运动意图 : 名称 : %s 数据 : %s" % (name, arg))
+    def default_callback(intent, name, arg):
+        print("未知意图 : ", intent, "   名称 : ", name, "  参数 :  - ", arg)
+
+    cmd = CommandTrigger()
+    cmd.add_intent("ROBOT_WALK", walk_callback)
+    cmd.add_intent("default", default_callback)
+
     bi = BaiduInteraction()
-    bi.parse("往右走10米")
+    bi.parse("向前走")
+    res = bi.get_response()
+
+    print(res.get_say())
+    res.exe_cmd(cmd)
+
+
+
+
