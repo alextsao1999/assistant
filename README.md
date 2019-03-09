@@ -35,4 +35,3 @@ ct.add_intent("default", callback)
 ```
 
 运行assistant.py 对着麦克风进行简单的机器人对话吧~
-

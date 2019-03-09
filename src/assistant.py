@@ -52,7 +52,7 @@ if __name__ == '__main__':
     ct = CommandTrigger()
 
     #添加意图触发回调 default 为默认触发
-    ct.add_intent("default", robot_walk_callback)
+    ct.add_intent("default", default_callback)
     ct.add_intent("ROBOT_WALK", robot_walk_callback)
 
     #在后台启动声音监测线程
