@@ -31,7 +31,7 @@ def default_callback(intent, name, value):
     pass
 
 ct = CommandTrigger()
-ct.add_intent("default", callback)
+ct.add_intent("default", default_callback)
 ```
 
 运行assistant.py 对着麦克风进行简单的机器人对话吧~
